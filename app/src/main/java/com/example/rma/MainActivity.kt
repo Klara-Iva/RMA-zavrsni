@@ -1,6 +1,7 @@
 package com.example.rma
 
 
+import LocationDetailScreen
 import RegisterScreen
 import android.annotation.SuppressLint
 import android.content.Context
@@ -17,6 +18,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.*
 import com.example.rma.ui.theme.RMATheme
@@ -41,7 +43,15 @@ class MainActivity : ComponentActivity() {
                     val currentUser = FirebaseAuth.getInstance().currentUser
                     val navController = rememberNavController()
                       if (currentUser != null) {
-                        MainScreen()
+                          NavHost(navController = navController, startDestination = "main") {
+                              composable("main") {
+                              MainScreen(navController)
+                              }
+                              composable("locationDetail/{documentId}") { backStackEntry ->
+                                      val documentId = backStackEntry.arguments?.getString("documentId") ?: return@composable
+                                      LocationDetailScreen(documentId)}
+
+                          }
                         }
                     else{
                           NavHost(navController = navController, startDestination = "login") {
@@ -71,7 +81,7 @@ sealed class Screen(val route: String, val label: String, val icon: Int) {
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun MainScreen()
+fun MainScreen(navController2: NavController)
 {
     val context = LocalContext.current
     val navController = rememberNavController()
@@ -111,18 +121,21 @@ fun MainScreen()
         }
     ) {
             innerPadding ->
-        // Apply the padding globally to the whole BottomNavScreensController
         Box(modifier = Modifier.padding(innerPadding)) {
-
             NavHost(navController, startDestination = Screen.Map.route) {
-                composable(Screen.Map.route) { MapScreen(apiKey = "AIzaSyAMYVa5WxW-RX0Cozu3ta2dDJxQUt_5IzI") }
+                composable(Screen.Map.route) { MapScreen(navController2) }
+                composable("locationDetail/{documentId}") { backStackEntry ->
+                    val documentId = backStackEntry.arguments?.getString("documentId") ?: return@composable
+                    LocationDetailScreen(documentId)
+                }
                 composable(Screen.Find.route) { SearchScreen() }
                 composable(Screen.Favourites.route) { FavouritesScreen() }
                 composable(Screen.Profile.route) { ProfileScreen(context) }
             }
         }
     }
-}
+    }
+
 
 
 
@@ -146,10 +159,3 @@ fun ProfileScreen(context: Context) {
     Text(text = "Profile Screen", modifier = Modifier.fillMaxSize(), textAlign = TextAlign.Center)
 }
 
-@Preview(showBackground = true)
-@Composable
-fun MainScreenPreview() {
-    RMATheme {
-        MainScreen()
-    }
-}

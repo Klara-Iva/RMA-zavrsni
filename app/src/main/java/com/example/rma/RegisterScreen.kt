@@ -1,5 +1,6 @@
 import android.content.Context
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -42,6 +43,7 @@ fun RegisterScreen(navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(Color(0xFFF0F0F0))
             .padding(16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -61,12 +63,7 @@ fun RegisterScreen(navController: NavController) {
             label = { Text("Name") },
             colors = outlinedTextFieldColors,
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
-            keyboardActions = KeyboardActions(
-                onNext = {
-                    // Move focus to the next text field
-                    keyboardController?.hide() // Hide the keyboard
-                }
-            )
+
         )
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
@@ -75,12 +72,7 @@ fun RegisterScreen(navController: NavController) {
             label = { Text("Email") },
             colors = outlinedTextFieldColors,
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
-            keyboardActions = KeyboardActions(
-                onNext = {
-                    // Move focus to the next text field
-                    keyboardController?.hide() // Hide the keyboard
-                }
-            )
+
         )
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
@@ -90,20 +82,14 @@ fun RegisterScreen(navController: NavController) {
             visualTransformation = PasswordVisualTransformation(),
             colors = outlinedTextFieldColors,
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
-            keyboardActions = KeyboardActions(
-                onDone = {
-                    // Perform registration action
-                    keyboardController?.hide() // Hide the keyboard
-                    register(context, name, email, password)
-                }
-            )
+
         )
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
             onClick = {
                 // Perform registration action
-                register(context, name, email, password)
+                register(context, name, email, password,navController)
             },
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = Color(0xFF82CC1C),
@@ -141,7 +127,7 @@ fun RegisterScreen(navController: NavController) {
 
 }
 
-private fun register(context: Context, name: String, email: String, password: String) {
+private fun register(context: Context, name: String, email: String, password: String,navController: NavController) {
     val auth = FirebaseAuth.getInstance()
     val db = FirebaseFirestore.getInstance()
 
@@ -159,7 +145,7 @@ private fun register(context: Context, name: String, email: String, password: St
                     db.collection("users").document(userId).set(user)
                         .addOnSuccessListener {
                             Toast.makeText(context, "Registered successfully", Toast.LENGTH_SHORT).show()
-                            (context as MainActivity).recreate()
+                            navController.navigate("map")
                         }
                         .addOnFailureListener { e ->
                             Toast.makeText(context, "Failed to save user data: ${e.message}", Toast.LENGTH_SHORT).show()

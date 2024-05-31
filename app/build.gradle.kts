@@ -57,11 +57,17 @@ dependencies {
     implementation("androidx.core:core-ktx:1.7.0")
     implementation("androidx.appcompat:appcompat:1.4.0")
     implementation("com.google.android.material:material:1.4.0")
-    implementation("androidx.compose.ui:ui:1.0.5")
-    implementation("androidx.compose.material:material:1.0.5")
+    implementation("androidx.compose.ui:ui:1.2.0")
+    implementation("androidx.compose.material:material:1.2.0")
     implementation("androidx.compose.ui:ui-tooling-preview:1.0.5")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.4.0")
     implementation("androidx.activity:activity-compose:1.4.0")
+
+
+    implementation ("androidx.navigation:navigation-compose:2.4.0-alpha10")
+    
+
+
     implementation(libs.androidx.navigation.common.ktx)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -83,7 +89,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation ("com.google.accompanist:accompanist-systemuicontroller:0.27.0")
-
+    implementation("io.coil-kt:coil-compose:2.0.0")
 
 }
 

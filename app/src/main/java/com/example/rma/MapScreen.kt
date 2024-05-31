@@ -3,9 +3,14 @@ package com.example.rma
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.TextButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -24,9 +29,14 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.UiSettings
 import com.google.firebase.firestore.FirebaseFirestore
 import androidx.navigation.NavController
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.Marker
+
 @Composable
-fun MapScreen(navController: NavController) {
+fun MapScreen(navController:NavController) {
     val context = LocalContext.current
+    var marker: Marker? = null
+    val markers = mutableListOf<Marker?>()
 
     var hasLocationPermission by remember {
         mutableStateOf(
@@ -49,7 +59,9 @@ fun MapScreen(navController: NavController) {
             locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         }
     }
-
+    BackHandler {
+        (context as ComponentActivity).finish()
+    }
     if (hasLocationPermission) {
         AndroidView(
             factory = { context ->
@@ -57,10 +69,10 @@ fun MapScreen(navController: NavController) {
                     onCreate(null)
                     onResume()
                     getMapAsync { googleMap ->
-                        val osijekLocation = LatLng(45.5549, 18.6956) // Osijek Coordinates
 
-                        // Move the camera to Osijek
-                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(osijekLocation, 12f))
+
+                        googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(CameraBounds.getCameraPosition()))
+                        googleMap.setOnCameraMoveListener { CameraBounds.setCameraPosition(googleMap.cameraPosition) }
 
                         // Enable location layer if permission granted
                         googleMap.isMyLocationEnabled = true
@@ -91,33 +103,70 @@ fun MapScreen(navController: NavController) {
                         // Adjust UI settings as needed
                         val uiSettings: UiSettings = googleMap.uiSettings
                         uiSettings.isZoomControlsEnabled = true
-
+                        val locations = mutableListOf<MapMarker>()
                         // Fetch locations from Firestore
                         FirebaseFirestore.getInstance().collection("locations")
                             .get()
                             .addOnSuccessListener { documents ->
-                                for (document in documents) {
-
-                                    val latitude = document.getDouble("latitude")
-                                    val longitude = document.getDouble("longitude")
-
-                                    if (latitude != null && longitude != null) {
-                                        val location = LatLng(latitude, longitude)
-                                        googleMap.addMarker(
-                                            MarkerOptions()
-                                                .position(location)
-
-                                        )?.tag = document.id // Set the document ID as the tag
-                                    }
+                                for (document in documents.documents) {
+                                    val coordinates = LatLng(
+                                        document.data!!["latitude"].toString().toDouble(),
+                                        document.data!!["longitude"].toString().toDouble()
+                                    )
+                                    locations.add(MapMarker(document.id, coordinates))
+                                }
+                            }
+                            .addOnCompleteListener {
+                                for (location in locations) {
+                                    val myMarker = googleMap.addMarker(MarkerOptions().position(location.cordinates))
+                                    myMarker!!.tag = location.id
+                                    markers.add(myMarker)
                                 }
 
+                                if (CameraBounds.showSpecifiedLocationOnMap) {
+
+                                    marker = googleMap.addMarker(
+                                        MarkerOptions().position(
+                                            LatLng(
+                                                CameraBounds.latitude,
+                                                CameraBounds.longitude
+                                            )
+                                        )
+                                            .icon(
+                                                BitmapDescriptorFactory.defaultMarker(
+                                                    BitmapDescriptorFactory.HUE_AZURE))
+                                            .title("Its here!")
+                                                /* TODO:  Marker Title is not showing*/
+
+                                    )
+
+                                    for (mark in markers) {
+                                        if (marker!!.position == mark?.position)
+                                            marker!!.tag = mark.tag
+
+                                    }
+                                    googleMap.setOnMapClickListener {
+                                        marker!!.remove()
+                                    }
+
+                                    CameraBounds.showSpecifiedLocationOnMap = false
+                                    marker?.showInfoWindow()
+
+                                }
+
+
+
                                 googleMap.setOnMarkerClickListener { marker ->
+
                                     val documentId = marker.tag as? String
                                     if (documentId != null) {
                                         navController.navigate("locationDetail/$documentId")
                                     }
                                     true
                                 }
+
+
+
                             }
                     }
                 }
@@ -133,4 +182,11 @@ fun MapScreen(navController: NavController) {
         )
     }
 }
+
+
+
+data class MapMarker(
+    var id: String,
+    var cordinates: LatLng
+)
 

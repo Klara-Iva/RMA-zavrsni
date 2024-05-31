@@ -2,6 +2,7 @@ package com.example.rma
 
 import android.content.Context
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -41,6 +42,7 @@ fun LoginRegisterScreen(navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(Color(0xFFF0F0F0))
             .padding(16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -67,7 +69,7 @@ fun LoginRegisterScreen(navController: NavController) {
 
         )
         Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = { signIn(context, email, password) },colors = ButtonDefaults.buttonColors(
+        Button(onClick = { signIn(context, email, password,navController) },colors = ButtonDefaults.buttonColors(
             backgroundColor = Color(0xFF82CC1C),
 
 
@@ -95,13 +97,13 @@ fun LoginRegisterScreen(navController: NavController) {
 }
 
 
-private fun signIn(context: Context, email: String, password: String) {
+private fun signIn(context: Context, email: String, password: String,navController: NavController) {
     FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
         .addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 Toast.makeText(context, "Logged in successfully", Toast.LENGTH_SHORT).show()
+                navController.navigate("map")
 
-                (context as MainActivity).recreate()//so the user doesnt have to exit and open again the app
             } else {
                 Toast.makeText(context, "Login failed", Toast.LENGTH_SHORT).show()
             }

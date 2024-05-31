@@ -2,7 +2,9 @@ package com.example.rma
 
 
 import LocationDetailScreen
+import ProfileScreen
 import RegisterScreen
+import SearchScreen
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
@@ -11,6 +13,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -20,6 +23,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
 import com.example.rma.ui.theme.RMATheme
 import com.example.rma.MapScreen
@@ -28,134 +33,129 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.padding
+
+
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+
+sealed class Screen(val route: String, val label: String, val icon: Int) {
+    object Map : Screen("map", "Map", R.drawable.ic_map)
+    object Find : Screen("search", "Search", R.drawable.ic_search)
+    object Favourites : Screen("favourites", "Favourites", R.drawable.ic_favourite)
+    object Profile : Screen("profile", "Profile", R.drawable.ic_profile)
+}
 
 class MainActivity : ComponentActivity() {
-    @SuppressLint("SuspiciousIndentation")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             RMATheme {
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colors.background
+                    modifier = Modifier
+                        .fillMaxSize()
+
                 ) {
-                    val context = LocalContext.current
-                    val currentUser = FirebaseAuth.getInstance().currentUser
-                    val navController = rememberNavController()
-                      if (currentUser != null) {
-                          NavHost(navController = navController, startDestination = "main") {
-                              composable("main") {
-                              MainScreen(navController)
-                              }
-                              composable("locationDetail/{documentId}") { backStackEntry ->
-                                      val documentId = backStackEntry.arguments?.getString("documentId") ?: return@composable
-                                      LocationDetailScreen(documentId)}
-
-                          }
-                        }
-                    else{
-                          NavHost(navController = navController, startDestination = "login") {
-                              composable("login") {
-                                  LoginRegisterScreen(navController)
-                              }
-                              composable("register") {
-                                  RegisterScreen(navController)
-                              }
-                          }
-
-                      }
-                    }
+                    RMA()
                 }
+            }
+
+        }
+    }
+}
+
+@Composable
+fun RMA() {
+    val navController = rememberNavController()
+    val bottomBarState = remember { mutableStateOf(true) }
+    LaunchedEffect(navController) {
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            bottomBarState.value = when (destination.route) {
+                Screen.Map.route, Screen.Find.route, Screen.Favourites.route, Screen.Profile.route -> true
+                else -> false
             }
         }
     }
-
-
-
-sealed class Screen(val route: String, val label: String, val icon: Int) {
-    object Map : Screen("map", "Map", icon =  R.drawable.ic_map)
-    object Find : Screen("search", "Search", icon =  R.drawable.ic_search)
-    object Favourites : Screen("favourites", "Favourites", icon =  R.drawable.ic_favourite)
-    object Profile : Screen("profile", "Profile",icon =  R.drawable.ic_profile)
-}
-
-@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
-@Composable
-fun MainScreen(navController2: NavController)
-{
-    val context = LocalContext.current
-    val navController = rememberNavController()
-    val items = listOf(Screen.Map, Screen.Find, Screen.Favourites, Screen.Profile)
 
     Scaffold(
         bottomBar = {
-            BottomNavigation(
-                backgroundColor = Color(0xFF82CC1C),
-                modifier = Modifier.height(56.dp)
-            ) {
-                val navBackStackEntry by navController.currentBackStackEntryAsState()
-                val currentDestination = navBackStackEntry?.destination
-                items.forEach { screen ->
-                    BottomNavigationItem(
-                        selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
-                        onClick = {
-                            navController.navigate(screen.route) {
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
-                        icon = {
-                            Icon(
-                                painterResource(id = screen.icon),
-                                contentDescription = null
-                            )
-                        },
-                        label = { Text(screen.label) },
-                        alwaysShowLabel = false,
-                        selectedContentColor = MaterialTheme.colors.onPrimary,
-                        unselectedContentColor = MaterialTheme.colors.onPrimary.copy(alpha = ContentAlpha.medium),
-                        modifier = Modifier.padding(8.dp)
-                    )
-                }
+            if (bottomBarState.value) {
+                BottomNavigationBar(navController)
             }
         }
+    ) { innerPadding ->
+        NavigationGraph(navController, Modifier.padding(innerPadding))
+    }
+}
+
+@Composable
+fun BottomNavigationBar(navController: NavHostController) {
+    BottomNavigation(
+        backgroundColor = Color(0xFF82CC1C),
+        contentColor = Color.White
     ) {
-            innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding)) {
-            NavHost(navController, startDestination = Screen.Map.route) {
-                composable(Screen.Map.route) { MapScreen(navController2) }
-                composable("locationDetail/{documentId}") { backStackEntry ->
-                    val documentId = backStackEntry.arguments?.getString("documentId") ?: return@composable
-                    LocationDetailScreen(documentId)
+        val items = listOf(Screen.Map, Screen.Find, Screen.Favourites, Screen.Profile)
+        val navBackStackEntry by navController.currentBackStackEntryAsState()
+        val currentDestination = navBackStackEntry?.destination
+        items.forEach { screen ->
+            BottomNavigationItem(
+                alwaysShowLabel = true,
+                selectedContentColor = Color.Black,
+                unselectedContentColor = MaterialTheme.colors.onPrimary.copy(alpha = ContentAlpha.medium),
+                modifier = Modifier.padding(8.dp),
+                icon = { Icon(painterResource(id = screen.icon), contentDescription = null) },
+                label = { Text(screen.label) },
+                selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
+                onClick = {
+
+                    navController.navigate(screen.route) {
+                        popUpTo(navController.graph.startDestinationId) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
                 }
-                composable(Screen.Find.route) { SearchScreen() }
-                composable(Screen.Favourites.route) { FavouritesScreen() }
-                composable(Screen.Profile.route) { ProfileScreen(context) }
-            }
+            )
         }
     }
-    }
-
-
-
-
-
-@Composable
-fun FavouritesScreen() {
-    Text(text = "Favourites Screen", modifier = Modifier.fillMaxSize(), textAlign = TextAlign.Center)
 }
 
 @Composable
-fun ProfileScreen(context: Context) {
+fun NavigationGraph(navController: NavHostController, modifier: Modifier = Modifier) {
+    NavHost(navController, startDestination = Screen.Map.route, modifier = modifier) {
+        composable(Screen.Map.route) { MapScreen(navController) }
+        composable(Screen.Find.route) { SearchScreen(navController) }
+        composable(Screen.Favourites.route) { FavouritesScreen() }
+        composable(Screen.Profile.route) { ProfileScreen(navController) }
+        if ( FirebaseAuth.getInstance().currentUser == null) {
+            composable("login") { LoginRegisterScreen(navController) }
+            composable("register") { RegisterScreen(navController) }
+        } else {
 
-    Button(onClick = { Firebase.auth.signOut()
-
-        (context as MainActivity).recreate()
-
+            composable("login") {
+                LaunchedEffect(Unit) {
+                    navController.navigate(Screen.Map.route)
+                }
+            }
+            composable("register") {
+                LaunchedEffect(Unit) {
+                    navController.navigate(Screen.Map.route)
+                }
+            }
+        }
+        composable("locationDetail/{documentId}") { backStackEntry ->
+            val documentId = backStackEntry.arguments?.getString("documentId") ?: return@composable
+            LocationDetailScreen(documentId,navController)
+        }
     }
-        ) {
-        Text("SignOut")
-    }
-    Text(text = "Profile Screen", modifier = Modifier.fillMaxSize(), textAlign = TextAlign.Center)
 }
+
+
+
+
+
 

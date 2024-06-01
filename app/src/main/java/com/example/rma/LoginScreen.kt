@@ -48,12 +48,14 @@ fun LoginRegisterScreen(navController: NavController) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
+
             text = "WELCOME",
             color = Color.Black,
             fontSize= 50.sp,
         )
         Spacer(modifier = Modifier.height(60.dp))
         OutlinedTextField(
+            maxLines = 1,
             value = email,
             onValueChange = { email = it },
             label = { Text("Email") },
@@ -61,6 +63,7 @@ fun LoginRegisterScreen(navController: NavController) {
         )
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
+            maxLines = 1,
             value = password,
             onValueChange = { password = it },
             label = { Text("Password") },
@@ -71,8 +74,6 @@ fun LoginRegisterScreen(navController: NavController) {
         Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = { signIn(context, email, password,navController) },colors = ButtonDefaults.buttonColors(
             backgroundColor = Color(0xFF82CC1C),
-
-
         ),
             modifier = Modifier .padding(vertical = 12.dp, horizontal = 24.dp) ,
             shape = RoundedCornerShape(50)

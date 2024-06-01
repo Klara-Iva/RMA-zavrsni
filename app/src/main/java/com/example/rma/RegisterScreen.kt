@@ -50,6 +50,7 @@ fun RegisterScreen(navController: NavController) {
     ) {
 
         Text(
+            maxLines = 1,
             text = "REGISTER NOW!",
             color = Color.Black,
             fontSize= 30.sp,
@@ -58,6 +59,7 @@ fun RegisterScreen(navController: NavController) {
 
 
         OutlinedTextField(
+            maxLines = 1,
             value = name,
             onValueChange = { name = it },
             label = { Text("Name") },
@@ -67,6 +69,7 @@ fun RegisterScreen(navController: NavController) {
         )
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
+            maxLines = 1,
             value = email,
             onValueChange = { email = it },
             label = { Text("Email") },

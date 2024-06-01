@@ -1,6 +1,7 @@
 package com.example.rma
 
 
+import AddNewLocationScreen
 import LocationDetailScreen
 import ProfileScreen
 import RegisterScreen
@@ -34,6 +35,15 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 
 import androidx.activity.compose.setContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.padding
 
@@ -55,14 +65,11 @@ class MainActivity : ComponentActivity() {
         setContent {
             RMATheme {
                 Surface(
-                    modifier = Modifier
-                        .fillMaxSize()
-
+                    modifier = Modifier.fillMaxSize()
                 ) {
                     RMA()
                 }
             }
-
         }
     }
 }
@@ -110,9 +117,8 @@ fun BottomNavigationBar(navController: NavHostController) {
                 label = { Text(screen.label) },
                 selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
                 onClick = {
-
                     navController.navigate(screen.route) {
-                        popUpTo(navController.graph.startDestinationId) {
+                        popUpTo(navController.graph.findStartDestination().id) {
                             saveState = true
                         }
                         launchSingleTop = true
@@ -124,18 +130,18 @@ fun BottomNavigationBar(navController: NavHostController) {
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun NavigationGraph(navController: NavHostController, modifier: Modifier = Modifier) {
     NavHost(navController, startDestination = Screen.Map.route, modifier = modifier) {
-        composable(Screen.Map.route) { MapScreen(navController) }
-        composable(Screen.Find.route) { SearchScreen(navController) }
-        composable(Screen.Favourites.route) { FavouritesScreen() }
-        composable(Screen.Profile.route) { ProfileScreen(navController) }
-        if ( FirebaseAuth.getInstance().currentUser == null) {
-            composable("login") { LoginRegisterScreen(navController) }
-            composable("register") { RegisterScreen(navController) }
+        composable(Screen.Map.route) { AnimatedScreen { MapScreen(navController) } }
+        composable(Screen.Find.route) { AnimatedScreen { SearchScreen(navController) } }
+        composable(Screen.Favourites.route) { AnimatedScreen { FavouritesScreen(navController) } }
+        composable(Screen.Profile.route) { AnimatedScreen { ProfileScreen(navController) } }
+        if (FirebaseAuth.getInstance().currentUser == null) {
+            composable("login") { AnimatedScreen { LoginRegisterScreen(navController) } }
+            composable("register") { AnimatedScreen { RegisterScreen(navController) } }
         } else {
-
             composable("login") {
                 LaunchedEffect(Unit) {
                     navController.navigate(Screen.Map.route)
@@ -149,8 +155,34 @@ fun NavigationGraph(navController: NavHostController, modifier: Modifier = Modif
         }
         composable("locationDetail/{documentId}") { backStackEntry ->
             val documentId = backStackEntry.arguments?.getString("documentId") ?: return@composable
-            LocationDetailScreen(documentId,navController)
+            LocationDetailScreenWithAnimation (documentId, navController)
         }
+
+        composable("addnewlocation") { AnimatedScreen {  AddNewLocationScreen(navController) } }
+
+    }
+}
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun AnimatedScreen(content: @Composable () -> Unit) {
+    AnimatedVisibility(
+        visible = true,
+        enter = slideInHorizontally(initialOffsetX = { fullWidth -> fullWidth }) + fadeIn(animationSpec = tween(700)),
+        exit = slideOutHorizontally(targetOffsetX = { fullWidth -> -fullWidth }) + fadeOut(animationSpec = tween(700)),
+    ) {
+        content()
+    }
+}
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun LocationDetailScreenWithAnimation(documentId: String, navController: NavController) {
+    AnimatedVisibility(
+        visible = true,
+        enter = fadeIn(initialAlpha = 0.3f) + slideInVertically(initialOffsetY = { it / 2 }, animationSpec = tween(500)),
+        exit = fadeOut() + slideOutVertically(targetOffsetY = { it / 2 }, animationSpec = tween(500))
+    ) {
+        LocationDetailScreen(documentId, navController)
     }
 }
 

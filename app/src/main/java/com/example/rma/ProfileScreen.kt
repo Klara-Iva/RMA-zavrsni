@@ -25,7 +25,6 @@ data class UserProfile(
     val name: String = "",
     val picture: String = ""
 )
-
 @Composable
 fun ProfileScreen(navController: NavController) {
     val user = FirebaseAuth.getInstance().currentUser
@@ -33,7 +32,6 @@ fun ProfileScreen(navController: NavController) {
     val firestore = FirebaseFirestore.getInstance()
 
     var userProfile by remember { mutableStateOf(UserProfile()) }
-
     var loadError by remember { mutableStateOf(false) }
 
     LaunchedEffect(userId) {
@@ -43,7 +41,6 @@ fun ProfileScreen(navController: NavController) {
                     if (document != null) {
                         userProfile = document.toObject(UserProfile::class.java) ?: UserProfile()
                     }
-
                 }
                 .addOnFailureListener { exception ->
                     loadError = true
@@ -52,61 +49,94 @@ fun ProfileScreen(navController: NavController) {
         }
     }
 
-
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxSize().background(Color(0xFFF0F0F0)).padding(16.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFF0F0F0))
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top
+    ) {
+        Box(
+            modifier = Modifier
+                .size(128.dp)
+                .clip(CircleShape)
+                .background(Color.White)
         ) {
-            if (loadError) {
-                Text("Error loading profile", color = MaterialTheme.colors.error)
-            } else {
-                if (userProfile.picture.isNotEmpty()) {
-                    Log.d("ProfileScreen", "Loading picture URL: ${userProfile.picture}")
-                    Image(
-                        painter = rememberAsyncImagePainter(userProfile.picture),
-                        contentDescription = "Profile Picture",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .size(128.dp)
-                            .clip(CircleShape)
-                            .padding(bottom = 0.dp)
-                    )
-                }
-
-                Text(
-                    text = "Email: ${userProfile.email}",
-                    style = MaterialTheme.typography.h6,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(bottom = 8.dp)
+            if (userProfile.picture.isNotEmpty()) {
+                Image(
+                    painter = rememberAsyncImagePainter(userProfile.picture),
+                    contentDescription = "Profile Picture",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
                 )
-                Text(
-                    text = "Name: ${userProfile.name}",
-                    style = MaterialTheme.typography.h6,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )
-
-                Button(onClick = {
-                    FirebaseAuth.getInstance().signOut()
-                    navController.navigate("login") {
-                        popUpTo(navController.graph.startDestinationId) {
-                            inclusive = true
-                        }
-                    }
-                },colors = ButtonDefaults.buttonColors(
-                    backgroundColor = Color(0xFF82CC1C),
-                    ),
-                    modifier = Modifier .padding(vertical = 12.dp, horizontal = 24.dp) ,
-                    shape = RoundedCornerShape(50)
-
-                ) {
-                    Text("Sign Out" ,
-                    color = Color.White,
-                    style = MaterialTheme.typography.button,
-                    )
-                }
             }
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "Email: ${userProfile.email}",
+            style = MaterialTheme.typography.body1,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "Name: ${userProfile.name}",
+            style = MaterialTheme.typography.body1,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+
+        Button(onClick = { navController.navigate("addnewlocation") },
+            colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF82CC1C)),
+            modifier = Modifier.padding(end = 8.dp),
+            shape = RoundedCornerShape(50)
+        ) {
+            androidx.compose.material.Text(
+                "Dodaj novu lokaciju",
+                color = Color.White,
+                style = androidx.compose.material.MaterialTheme.typography.button,
+            )
+        }
+
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Button(
+            onClick = {
+                FirebaseAuth.getInstance().signOut()
+                navController.navigate("login") {
+                    popUpTo(navController.graph.startDestinationId) {
+                        inclusive = true
+                    }
+                }
+            },
+            colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF82CC1C)),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 12.dp, horizontal = 24.dp),
+            shape = RoundedCornerShape(50)
+        ) {
+            Text(
+                "Sign Out",
+                color = Color.White,
+                style = MaterialTheme.typography.button,
+            )
+        }
+
+        if (loadError) {
+            Text("Error loading profile", color = MaterialTheme.colors.error)
+        }
+
+
+
+
     }
+
+}
 

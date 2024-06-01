@@ -62,10 +62,10 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview:1.0.5")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.4.0")
     implementation("androidx.activity:activity-compose:1.4.0")
+    implementation ("androidx.compose.foundation:foundation:1.1.0")
 
-
-    implementation ("androidx.navigation:navigation-compose:2.4.0-alpha10")
-    
+    implementation ("androidx.navigation:navigation-compose:2.7.7")
+    implementation ("com.google.accompanist:accompanist-navigation-animation:0.23.1")
 
 
     implementation(libs.androidx.navigation.common.ktx)
@@ -81,6 +81,7 @@ dependencies {
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.auth.ktx)
     implementation(libs.firebase.messaging)
+    implementation(libs.firebase.storage.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

@@ -91,8 +91,11 @@ fun RegisterScreen(navController: NavController) {
 
         Button(
             onClick = {
-                // Perform registration action
-                register(context, name, email, password,navController)
+               if(name.isNotEmpty()&&email.isNotEmpty()&&password.isNotEmpty()){
+                register(context, name, email, password,navController)}
+               else{
+                   Toast.makeText(context, "Missing data", Toast.LENGTH_SHORT).show()
+               }
             },
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = Color(0xFF82CC1C),
@@ -148,7 +151,7 @@ private fun register(context: Context, name: String, email: String, password: St
                     db.collection("users").document(userId).set(user)
                         .addOnSuccessListener {
                             Toast.makeText(context, "Registered successfully", Toast.LENGTH_SHORT).show()
-                            navController.navigate("map")
+                            (context as MainActivity).recreate()//????
                         }
                         .addOnFailureListener { e ->
                             Toast.makeText(context, "Failed to save user data: ${e.message}", Toast.LENGTH_SHORT).show()

@@ -55,8 +55,9 @@ import androidx.navigation.compose.rememberNavController
 sealed class Screen(val route: String, val label: String, val icon: Int) {
     object Map : Screen("map", "Map", R.drawable.ic_map)
     object Find : Screen("search", "Search", R.drawable.ic_search)
-    object Favourites : Screen("favourites", "Favourites", R.drawable.ic_favourite)
+    object Favourites : Screen("favourites", "Faves", R.drawable.ic_favourite)
     object Profile : Screen("profile", "Profile", R.drawable.ic_profile)
+    object AddNewLocation: Screen("addnewlocation","Add",R.drawable.ic_add)
 }
 
 class MainActivity : ComponentActivity() {
@@ -81,7 +82,7 @@ fun RMA() {
     LaunchedEffect(navController) {
         navController.addOnDestinationChangedListener { _, destination, _ ->
             bottomBarState.value = when (destination.route) {
-                Screen.Map.route, Screen.Find.route, Screen.Favourites.route, Screen.Profile.route -> true
+                Screen.Map.route, Screen.Find.route, Screen.Favourites.route,Screen.AddNewLocation.route, Screen.Profile.route -> true
                 else -> false
             }
         }
@@ -104,7 +105,7 @@ fun BottomNavigationBar(navController: NavHostController) {
         backgroundColor = Color(0xFF82CC1C),
         contentColor = Color.White
     ) {
-        val items = listOf(Screen.Map, Screen.Find, Screen.Favourites, Screen.Profile)
+        val items = listOf(Screen.Map, Screen.Find, Screen.Favourites,Screen.AddNewLocation, Screen.Profile)
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentDestination = navBackStackEntry?.destination
         items.forEach { screen ->
@@ -133,24 +134,25 @@ fun BottomNavigationBar(navController: NavHostController) {
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun NavigationGraph(navController: NavHostController, modifier: Modifier = Modifier) {
-    NavHost(navController, startDestination = Screen.Map.route, modifier = modifier) {
+    NavHost(navController, startDestination = "login", modifier = modifier) {
         composable(Screen.Map.route) { AnimatedScreen { MapScreen(navController) } }
         composable(Screen.Find.route) { AnimatedScreen { SearchScreen(navController) } }
         composable(Screen.Favourites.route) { AnimatedScreen { FavouritesScreen(navController) } }
         composable(Screen.Profile.route) { AnimatedScreen { ProfileScreen(navController) } }
+        composable(Screen.AddNewLocation.route) { AnimatedScreen { AddNewLocationScreen(navController) } }
         if (FirebaseAuth.getInstance().currentUser == null) {
             composable("login") { AnimatedScreen { LoginRegisterScreen(navController) } }
             composable("register") { AnimatedScreen { RegisterScreen(navController) } }
         } else {
             composable("login") {
-                LaunchedEffect(Unit) {
+
                     navController.navigate(Screen.Map.route)
-                }
+
             }
             composable("register") {
-                LaunchedEffect(Unit) {
+
                     navController.navigate(Screen.Map.route)
-                }
+
             }
         }
         composable("locationDetail/{documentId}") { backStackEntry ->

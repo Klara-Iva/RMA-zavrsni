@@ -4,7 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -81,7 +80,7 @@ fun FavouritesScreen(navController: NavController) {
             .background(Color(0xFFF0F0F0))
             .fillMaxSize()
             .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             color = Color.Black,
@@ -89,7 +88,6 @@ fun FavouritesScreen(navController: NavController) {
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 16.dp)
-
         )
         if (favoriteLocations.isEmpty()) {
             Box(
@@ -141,13 +139,12 @@ fun fetchFavoriteLocations(favoriteIds: List<String>, callback: (List<Location>)
 @Composable
 fun LocationItem(location: Location, navController: NavController, removeFromFavorites: () -> Unit) {
     Card(
-
         shape = RoundedCornerShape(8.dp),
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 16.dp)
             .clickable {
-                removeFromFavorites()
+                navController.navigate("locationDetail/${location.id}")
             },
         elevation = CardDefaults.cardElevation(16.dp)
     ) {
@@ -156,7 +153,6 @@ fun LocationItem(location: Location, navController: NavController, removeFromFav
                 .fillMaxWidth()
                 .background(Color.White)
                 .padding(0.dp),
-
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
@@ -183,19 +179,13 @@ fun LocationItem(location: Location, navController: NavController, removeFromFav
                     color = Color.Black,
                     maxLines = 2
                 )
-                Text(
-                    text = location.opis,
-                    fontSize = 12.sp,
-                    color = Color(0xFFFa1a1a1),
-                    maxLines = 3,
-                    lineHeight= 16.sp
-                )
+
             }
             Image(
                 painter = painterResource(id = R.drawable.ic_favourite),
                 contentDescription = "Favorite",
                 modifier = Modifier
-                    .absolutePadding(10.dp,0.dp,10.dp,0.dp)
+                    .absolutePadding(10.dp, 0.dp, 10.dp, 0.dp)
                     .size(40.dp)
                     .noRippleClickable {
                         removeFromFavorites()

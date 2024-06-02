@@ -28,115 +28,106 @@ data class UserProfile(
 @Composable
 fun ProfileScreen(navController: NavController) {
     val user = FirebaseAuth.getInstance().currentUser
-    val userId = user?.uid
-    val firestore = FirebaseFirestore.getInstance()
+    if(user!=null) {
+        val userId = user?.uid
+        val firestore = FirebaseFirestore.getInstance()
 
-    var userProfile by remember { mutableStateOf(UserProfile()) }
-    var loadError by remember { mutableStateOf(false) }
+        var userProfile by remember { mutableStateOf(UserProfile()) }
+        var loadError by remember { mutableStateOf(false) }
 
-    LaunchedEffect(userId) {
-        if (userId != null) {
-            firestore.collection("users").document(userId).get()
-                .addOnSuccessListener { document ->
-                    if (document != null) {
-                        userProfile = document.toObject(UserProfile::class.java) ?: UserProfile()
+        LaunchedEffect(userId) {
+            if (userId != null) {
+                firestore.collection("users").document(userId).get()
+                    .addOnSuccessListener { document ->
+                        if (document != null) {
+                            userProfile =
+                                document.toObject(UserProfile::class.java) ?: UserProfile()
+                        }
                     }
-                }
-                .addOnFailureListener { exception ->
-                    loadError = true
-                    Log.e("ProfileScreen", "Error fetching profile data", exception)
-                }
-        }
-    }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFFF0F0F0))
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
-    ) {
-        Box(
-            modifier = Modifier
-                .size(128.dp)
-                .clip(CircleShape)
-                .background(Color.White)
-        ) {
-            if (userProfile.picture.isNotEmpty()) {
-                Image(
-                    painter = rememberAsyncImagePainter(userProfile.picture),
-                    contentDescription = "Profile Picture",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
+                    .addOnFailureListener { exception ->
+                        loadError = true
+                        Log.e("ProfileScreen", "Error fetching profile data", exception)
+                    }
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = "Email: ${userProfile.email}",
-            style = MaterialTheme.typography.body1,
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = "Name: ${userProfile.name}",
-            style = MaterialTheme.typography.body1,
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-
-        Button(onClick = { navController.navigate("addnewlocation") },
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF82CC1C)),
-            modifier = Modifier.padding(end = 8.dp),
-            shape = RoundedCornerShape(50)
-        ) {
-            androidx.compose.material.Text(
-                "Dodaj novu lokaciju",
-                color = Color.White,
-                style = androidx.compose.material.MaterialTheme.typography.button,
-            )
-        }
-
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Button(
-            onClick = {
-                FirebaseAuth.getInstance().signOut()
-                navController.navigate("login") {
-                    popUpTo(navController.graph.startDestinationId) {
-                        inclusive = true
-                    }
-                }
-            },
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF82CC1C)),
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 12.dp, horizontal = 24.dp),
-            shape = RoundedCornerShape(50)
+                .fillMaxSize()
+                .background(Color(0xFFF0F0F0))
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top
         ) {
+            Box(
+                modifier = Modifier
+                    .size(128.dp)
+                    .clip(CircleShape)
+                    .background(Color.White)
+            ) {
+                if (userProfile.picture.isNotEmpty()) {
+                    Image(
+                        painter = rememberAsyncImagePainter(userProfile.picture),
+                        contentDescription = "Profile Picture",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             Text(
-                "Sign Out",
-                color = Color.White,
-                style = MaterialTheme.typography.button,
+                text = "Email: ${userProfile.email}",
+                style = MaterialTheme.typography.body1,
+                textAlign = TextAlign.Center
             )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "Name: ${userProfile.name}",
+                style = MaterialTheme.typography.body1,
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+
+           Spacer(modifier = Modifier.height(32.dp))
+
+            Button(
+                onClick = {
+                    FirebaseAuth.getInstance().signOut()
+                    navController.navigate("login") {
+                        popUpTo(navController.graph.startDestinationId) {
+                            inclusive = true
+                        }
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF82CC1C)),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 12.dp, horizontal = 24.dp)
+                    ,
+                shape = RoundedCornerShape(50)
+            ) {
+                Text(
+                    "Sign Out",
+                    color = Color.White,
+                    style = MaterialTheme.typography.button,
+                )
+            }
+
+            if (loadError) {
+                Text("Error loading profile", color = MaterialTheme.colors.error)
+            }
+
+
         }
-
-        if (loadError) {
-            Text("Error loading profile", color = MaterialTheme.colors.error)
-        }
-
-
-
-
     }
-
+    else{
+        navController.navigate("login")
+    }
 }
 

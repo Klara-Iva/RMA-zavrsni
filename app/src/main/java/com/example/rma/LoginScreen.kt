@@ -72,7 +72,17 @@ fun LoginRegisterScreen(navController: NavController) {
 
         )
         Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = { signIn(context, email, password,navController) },colors = ButtonDefaults.buttonColors(
+        Button(onClick = {
+            if(email.isNotEmpty() && password.isNotEmpty()){
+            signIn(context, email, password,navController)}
+            else{
+                Toast.makeText(context, "Missing data", Toast.LENGTH_SHORT).show()
+            }
+
+                         },
+
+
+            colors = ButtonDefaults.buttonColors(
             backgroundColor = Color(0xFF82CC1C),
         ),
             modifier = Modifier .padding(vertical = 12.dp, horizontal = 24.dp) ,
@@ -99,16 +109,19 @@ fun LoginRegisterScreen(navController: NavController) {
 
 
 private fun signIn(context: Context, email: String, password: String,navController: NavController) {
-    FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
-        .addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                Toast.makeText(context, "Logged in successfully", Toast.LENGTH_SHORT).show()
-                navController.navigate("map")
 
-            } else {
-                Toast.makeText(context, "Login failed", Toast.LENGTH_SHORT).show()
-            }
-        }
+        FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Toast.makeText(context, "Logged in successfully", Toast.LENGTH_SHORT).show()
+                    (context as MainActivity).recreate()
+
+                } else {
+                    Toast.makeText(context, "Login failed", Toast.LENGTH_SHORT).show()
+                }
+
+    }
+
 }
 
 

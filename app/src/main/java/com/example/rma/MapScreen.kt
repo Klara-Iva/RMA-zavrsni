@@ -31,55 +31,64 @@ import com.google.firebase.firestore.FirebaseFirestore
 import androidx.navigation.NavController
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.Marker
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun MapScreen(navController:NavController) {
-    val context = LocalContext.current
-    var marker: Marker? = null
-    val markers = mutableListOf<Marker?>()
 
-    var hasLocationPermission by remember {
-        mutableStateOf(
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
+    if (FirebaseAuth.getInstance().currentUser == null) {
+        navController.navigate("login")
+    } else {
+        val context = LocalContext.current
+        var marker: Marker? = null
+        val markers = mutableListOf<Marker?>()
+
+        var hasLocationPermission by remember {
+            mutableStateOf(
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            )
+        }
+
+        val locationPermissionLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission(),
+            onResult = { granted ->
+                hasLocationPermission = granted
+            }
         )
-    }
 
-    val locationPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-        onResult = { granted ->
-            hasLocationPermission = granted
+        LaunchedEffect(key1 = true) {
+            if (!hasLocationPermission) {
+                locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            }
         }
-    )
-
-    LaunchedEffect(key1 = true) {
-        if (!hasLocationPermission) {
-            locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        BackHandler {
+            (context as ComponentActivity).finish()
         }
-    }
-    BackHandler {
-        (context as ComponentActivity).finish()
-    }
-    if (hasLocationPermission) {
-        AndroidView(
-            factory = { context ->
-                MapView(context).apply {
-                    onCreate(null)
-                    onResume()
-                    getMapAsync { googleMap ->
+        if (hasLocationPermission) {
+            AndroidView(
+                factory = { context ->
+                    MapView(context).apply {
+                        onCreate(null)
+                        onResume()
+                        getMapAsync { googleMap ->
 
 
-                        googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(CameraBounds.getCameraPosition()))
-                        googleMap.setOnCameraMoveListener { CameraBounds.setCameraPosition(googleMap.cameraPosition) }
+                            googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(CameraBounds.getCameraPosition()))
+                            googleMap.setOnCameraMoveListener {
+                                CameraBounds.setCameraPosition(
+                                    googleMap.cameraPosition
+                                )
+                            }
 
-                        // Enable location layer if permission granted
-                        googleMap.isMyLocationEnabled = true
+                            // Enable location layer if permission granted
+                            googleMap.isMyLocationEnabled = true
 
-                        googleMap.setMapStyle(
-                            MapStyleOptions(
-                                """
+                            googleMap.setMapStyle(
+                                MapStyleOptions(
+                                    """
                                 [
                                     {
                                         "featureType": "poi",
@@ -97,89 +106,92 @@ fun MapScreen(navController:NavController) {
                                     }
                                 ]
                                 """.trimIndent()
+                                )
                             )
-                        )
 
-                        // Adjust UI settings as needed
-                        val uiSettings: UiSettings = googleMap.uiSettings
-                        uiSettings.isZoomControlsEnabled = true
-                        val locations = mutableListOf<MapMarker>()
-                        // Fetch locations from Firestore
-                        FirebaseFirestore.getInstance().collection("locations")
-                            .get()
-                            .addOnSuccessListener { documents ->
-                                for (document in documents.documents) {
-                                    val coordinates = LatLng(
-                                        document.data!!["latitude"].toString().toDouble(),
-                                        document.data!!["longitude"].toString().toDouble()
-                                    )
-                                    locations.add(MapMarker(document.id, coordinates))
-                                }
-                            }
-                            .addOnCompleteListener {
-                                for (location in locations) {
-                                    val myMarker = googleMap.addMarker(MarkerOptions().position(location.cordinates))
-                                    myMarker!!.tag = location.id
-                                    markers.add(myMarker)
-                                }
-
-                                if (CameraBounds.showSpecifiedLocationOnMap) {
-
-                                    marker = googleMap.addMarker(
-                                        MarkerOptions().position(
-                                            LatLng(
-                                                CameraBounds.latitude,
-                                                CameraBounds.longitude
-                                            )
+                            // Adjust UI settings as needed
+                            val uiSettings: UiSettings = googleMap.uiSettings
+                            uiSettings.isZoomControlsEnabled = true
+                            val locations = mutableListOf<MapMarker>()
+                            // Fetch locations from Firestore
+                            FirebaseFirestore.getInstance().collection("locations")
+                                .get()
+                                .addOnSuccessListener { documents ->
+                                    for (document in documents.documents) {
+                                        val coordinates = LatLng(
+                                            document.data!!["latitude"].toString().toDouble(),
+                                            document.data!!["longitude"].toString().toDouble()
                                         )
-                                            .icon(
-                                                BitmapDescriptorFactory.defaultMarker(
-                                                    BitmapDescriptorFactory.HUE_AZURE))
-                                            .title("Its here!")
-                                                /* TODO:  Marker Title is not showing*/
-
-                                    )
-
-                                    for (mark in markers) {
-                                        if (marker!!.position == mark?.position)
-                                            marker!!.tag = mark.tag
-
+                                        locations.add(MapMarker(document.id, coordinates))
                                     }
-                                    googleMap.setOnMapClickListener {
-                                        marker!!.remove()
+                                }
+                                .addOnCompleteListener {
+                                    for (location in locations) {
+                                        val myMarker =
+                                            googleMap.addMarker(MarkerOptions().position(location.cordinates))
+                                        myMarker!!.tag = location.id
+                                        markers.add(myMarker)
                                     }
 
-                                    CameraBounds.showSpecifiedLocationOnMap = false
-                                    marker?.showInfoWindow()
+                                    if (CameraBounds.showSpecifiedLocationOnMap) {
+
+                                        marker = googleMap.addMarker(
+                                            MarkerOptions().position(
+                                                LatLng(
+                                                    CameraBounds.latitude,
+                                                    CameraBounds.longitude
+                                                )
+                                            )
+                                                .icon(
+                                                    BitmapDescriptorFactory.defaultMarker(
+                                                        BitmapDescriptorFactory.HUE_AZURE
+                                                    )
+                                                )
+                                                .title("Its here!")
+
+
+                                        )
+
+                                        for (mark in markers) {
+                                            if (marker!!.position == mark?.position)
+                                                marker!!.tag = mark.tag
+
+                                        }
+                                        googleMap.setOnMapClickListener {
+                                            marker!!.remove()
+                                        }
+
+                                        CameraBounds.showSpecifiedLocationOnMap = false
+                                        marker?.showInfoWindow()
+
+                                    }
+
+
+
+                                    googleMap.setOnMarkerClickListener { marker ->
+
+                                        val documentId = marker.tag as? String
+                                        if (documentId != null) {
+                                            navController.navigate("locationDetail/$documentId")
+                                        }
+                                        true
+                                    }
+
 
                                 }
-
-
-
-                                googleMap.setOnMarkerClickListener { marker ->
-
-                                    val documentId = marker.tag as? String
-                                    if (documentId != null) {
-                                        navController.navigate("locationDetail/$documentId")
-                                    }
-                                    true
-                                }
-
-
-
-                            }
+                        }
                     }
-                }
-            },
-            modifier = Modifier.fillMaxSize()
-        )
-    } else {
-        // Handle the case when permission is not granted
-        Text(
-            text = "Permission not granted for accessing location.",
-            modifier = Modifier.fillMaxSize(),
-            textAlign = TextAlign.Center
-        )
+                },
+                modifier = Modifier.fillMaxSize()
+            )
+        } else {
+            // Handle the case when permission is not granted
+            Text(
+                text = "Permission not granted for accessing location.",
+                modifier = Modifier.fillMaxSize(),
+                textAlign = TextAlign.Center
+            )
+        }
     }
 }
 

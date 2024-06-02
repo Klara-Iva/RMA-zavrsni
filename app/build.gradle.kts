@@ -92,5 +92,9 @@ dependencies {
     implementation ("com.google.accompanist:accompanist-systemuicontroller:0.27.0")
     implementation("io.coil-kt:coil-compose:2.0.0")
 
+    implementation("com.google.firebase:firebase-messaging-ktx:24.0.0")
+    implementation("com.google.accompanist:accompanist-permissions:0.30.1")
+
+
 }
 

@@ -1,16 +1,12 @@
 package com.example.rma
 
 import android.Manifest
-import android.content.Context
 import android.content.pm.PackageManager
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.TextButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -20,12 +16,9 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.MapView
-import com.google.android.gms.maps.MapsInitializer
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.UiSettings
 import com.google.firebase.firestore.FirebaseFirestore
 import androidx.navigation.NavController
@@ -40,7 +33,7 @@ fun MapScreen(navController:NavController) {
         navController.navigate("login")
     } else {
         val context = LocalContext.current
-        var marker: Marker? = null
+        var marker: Marker?
         val markers = mutableListOf<Marker?>()
 
         var hasLocationPermission by remember {

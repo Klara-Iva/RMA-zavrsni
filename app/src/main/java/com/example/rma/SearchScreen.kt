@@ -1,7 +1,8 @@
+package com.example.rma
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,25 +16,23 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
+
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
+
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
+
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
+
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -50,8 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
-import coil.compose.rememberImagePainter
-import com.example.rma.R
+
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
@@ -61,13 +59,13 @@ import com.google.firebase.ktx.Firebase
 
 @Composable
 fun SearchScreen(navController: NavController) {
-    val context = LocalContext.current
+
     var searchQuery by remember { mutableStateOf("") }
     var locations by remember { mutableStateOf(listOf<Location>()) }
     var allLocations by remember { mutableStateOf(listOf<Location>()) }
     var favoriteLocations by remember { mutableStateOf(listOf<String>()) }
     val userId = FirebaseAuth.getInstance().currentUser?.uid
-    val db = Firebase.firestore
+
 
     // Fetch locations on initial load
     LaunchedEffect(Unit) {
@@ -134,7 +132,7 @@ fun LocationCard(
     userId: String?,
     onFavoriteUpdated: (List<String>) -> Unit
 ) {
-    var animationScale by remember { mutableStateOf(1f) }
+    var animationScale by remember { mutableFloatStateOf(1f) }
     val animatedScale by animateFloatAsState(
         targetValue = animationScale,
         animationSpec = tween(durationMillis = 100)
@@ -187,7 +185,7 @@ fun LocationCard(
 
             Box {
                 Image(
-                    painter = rememberAsyncImagePainter(location.imageUrl),
+                    painter = rememberAsyncImagePainter(location.slika),
                     contentScale = ContentScale.Crop,
                     contentDescription = location.name,
                     modifier = Modifier
@@ -220,7 +218,7 @@ fun LocationCard(
                 }
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
-                    location.description,
+                    location.opis,
                     maxLines = 5,
                     overflow = TextOverflow.Ellipsis,
                     color = Color(0xFFFa1a1a1),
@@ -230,7 +228,7 @@ fun LocationCard(
         }
     }
 }
-data class Location(val id: String, val name: String, val imageUrl: String, val description: String)
+
 fun fetchLocationsFromFirestore(onResult: (List<Location>) -> Unit) {
     val firestore = FirebaseFirestore.getInstance()
     firestore.collection("locations")
@@ -241,7 +239,7 @@ fun fetchLocationsFromFirestore(onResult: (List<Location>) -> Unit) {
                 val imageUrl = doc.getString("slika")
                 val description = doc.getString("opis")
                 if (name != null && imageUrl != null && description != null) {
-                    Location(doc.id, name, imageUrl, description)
+                    Location(doc.id, name,  description,imageUrl,)
                 } else {
                     null
                 }

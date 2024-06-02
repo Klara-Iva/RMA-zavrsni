@@ -1,26 +1,15 @@
+
 package com.example.rma
 
-
-import AddNewLocationScreen
-import LocationDetailScreen
-import ProfileScreen
-import RegisterScreen
-import SearchScreen
-import android.annotation.SuppressLint
-import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -28,13 +17,7 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
 import com.example.rma.ui.theme.RMATheme
-import com.example.rma.MapScreen
-
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
-
-import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
@@ -44,10 +27,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.padding
-
-
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -131,7 +111,7 @@ fun BottomNavigationBar(navController: NavHostController) {
     }
 }
 
-@OptIn(ExperimentalAnimationApi::class)
+
 @Composable
 fun NavigationGraph(navController: NavHostController, modifier: Modifier = Modifier) {
     NavHost(navController, startDestination = "login", modifier = modifier) {
@@ -146,12 +126,12 @@ fun NavigationGraph(navController: NavHostController, modifier: Modifier = Modif
         } else {
             composable("login") {
 
-                    navController.navigate(Screen.Map.route)
+                navController.navigate(Screen.Map.route)
 
             }
             composable("register") {
 
-                    navController.navigate(Screen.Map.route)
+                navController.navigate(Screen.Map.route)
 
             }
         }
@@ -165,7 +145,7 @@ fun NavigationGraph(navController: NavHostController, modifier: Modifier = Modif
     }
 }
 
-@OptIn(ExperimentalAnimationApi::class)
+
 @Composable
 fun AnimatedScreen(content: @Composable () -> Unit) {
     AnimatedVisibility(
@@ -176,7 +156,7 @@ fun AnimatedScreen(content: @Composable () -> Unit) {
         content()
     }
 }
-@OptIn(ExperimentalAnimationApi::class)
+
 @Composable
 fun LocationDetailScreenWithAnimation(documentId: String, navController: NavController) {
     AnimatedVisibility(
@@ -187,9 +167,3 @@ fun LocationDetailScreenWithAnimation(documentId: String, navController: NavCont
         LocationDetailScreen(documentId, navController)
     }
 }
-
-
-
-
-
-

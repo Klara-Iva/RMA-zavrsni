@@ -1,3 +1,4 @@
+package com.example.rma
 import android.content.Context
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -24,10 +25,11 @@ import androidx.compose.material.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import coil.compose.rememberImagePainter
+import com.google.firebase.messaging.RemoteMessage
 
 @Composable
 fun AddNewLocationScreen(navController: NavController) {
-    val context = LocalContext.current
+
     val currentUser = Firebase.auth.currentUser
     val db = Firebase.firestore
     val storage = Firebase.storage
@@ -111,7 +113,12 @@ fun AddNewLocationScreen(navController: NavController) {
         Button(onClick = {
             Toast.makeText(context, "Uploading...", Toast.LENGTH_SHORT).show()
             addLocation(context = context, name, latitude, longitude, description, selectedImageUri, currentUser?.uid, storage, db)
-        },
+            name = ""
+            latitude = ""
+            longitude = ""
+            description = ""
+            selectedImageUri = null
+                         },
             colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF82CC1C)),
             modifier = Modifier.padding(end = 8.dp),
             shape = RoundedCornerShape(50)
@@ -132,7 +139,7 @@ private fun addLocation(
     storage: FirebaseStorage,
     db: FirebaseFirestore
 ) {
-    // Convert latitude and longitude to Double if needed
+
     val lat = latitude.toDoubleOrNull()
     val lng = longitude.toDoubleOrNull()
 
@@ -161,7 +168,7 @@ private fun addLocation(
                             .add(location)
                             .addOnSuccessListener {
                                 Toast.makeText(context, "Location successfully uploaded!", Toast.LENGTH_SHORT).show()
-                            }
+                                }
                             .addOnFailureListener { e ->
                                 Toast.makeText(context, "Failed to upload location.", Toast.LENGTH_SHORT).show()
                             }

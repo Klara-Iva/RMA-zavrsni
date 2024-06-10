@@ -2,11 +2,10 @@ package com.example.rma
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
-
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,16 +15,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-
 import androidx.compose.foundation.shape.RoundedCornerShape
-
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
-
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
@@ -41,7 +36,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -49,7 +43,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
-
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
@@ -59,7 +52,6 @@ import com.google.firebase.ktx.Firebase
 
 @Composable
 fun SearchScreen(navController: NavController) {
-
     var searchQuery by remember { mutableStateOf("") }
     var locations by remember { mutableStateOf(listOf<Location>()) }
     var allLocations by remember { mutableStateOf(listOf<Location>()) }
@@ -67,7 +59,6 @@ fun SearchScreen(navController: NavController) {
     val userId = FirebaseAuth.getInstance().currentUser?.uid
 
 
-    // Fetch locations on initial load
     LaunchedEffect(Unit) {
         fetchLocationsFromFirestore { result ->
             allLocations = result
@@ -79,15 +70,16 @@ fun SearchScreen(navController: NavController) {
     }
 
     val outlinedTextFieldColors = TextFieldDefaults.outlinedTextFieldColors(
-        focusedBorderColor = Color(0xFF82CC1C), // Color when focused
-        unfocusedBorderColor = Color.Gray, // Color when not focused
-        cursorColor = Color(0xFF82CC1C), // Color of the caret (pointer)
-        focusedLabelColor = Color(0xFF82CC1C) // Color of the label when focused
+        focusedBorderColor = Color(0xFF887177),
+        unfocusedBorderColor = Color.Gray,
+        cursorColor = Color(0xFF887177),
+        focusedLabelColor = Color(0xFF887177)
     )
 
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(Color(0xFFf8f7f7))
             .absolutePadding(5.dp, 5.dp, 5.dp, 0.dp)
     ) {
         TextField(
@@ -169,23 +161,27 @@ fun LocationCard(
             animationScale = 1f
         }
     }
+
+
     Card(
+
         shape = RoundedCornerShape(12.dp),
-        elevation = 16.dp,
+        elevation = 10.dp,
         modifier = Modifier
             .fillMaxWidth()
+
             .padding(8.dp)
             .height(250.dp)
             .clickable {
                 navController.navigate("locationDetail/${location.id}")
             }
     ) {
-        Column {
+        Column( modifier= Modifier.background(Color(0xFFFFFFFF))) {
 
 
             Box {
                 Image(
-                    painter = rememberAsyncImagePainter(location.slika),
+                    painter = rememberAsyncImagePainter(location.picture1),
                     contentScale = ContentScale.Crop,
                     contentDescription = location.name,
                     modifier = Modifier
@@ -218,11 +214,16 @@ fun LocationCard(
                 }
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
-                    location.opis,
+                    location.description,
                     maxLines = 5,
                     overflow = TextOverflow.Ellipsis,
                     color = Color(0xFFFa1a1a1),
-                    lineHeight = 16.sp
+                    lineHeight = 16.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(3.dp)
+
+
+
                 )
             }
         }
@@ -236,8 +237,8 @@ fun fetchLocationsFromFirestore(onResult: (List<Location>) -> Unit) {
         .addOnSuccessListener { documents ->
             val locations = documents.mapNotNull { doc ->
                 val name = doc.getString("name")
-                val imageUrl = doc.getString("slika")
-                val description = doc.getString("opis")
+                val imageUrl = doc.getString("picture1")
+                val description = doc.getString("description")
                 if (name != null && imageUrl != null && description != null) {
                     Location(doc.id, name,  description,imageUrl,)
                 } else {

@@ -67,8 +67,6 @@ fun MapScreen(navController:NavController) {
                         onCreate(null)
                         onResume()
                         getMapAsync { googleMap ->
-
-
                             googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(CameraBounds.getCameraPosition()))
                             googleMap.setOnCameraMoveListener {
                                 CameraBounds.setCameraPosition(
@@ -76,7 +74,7 @@ fun MapScreen(navController:NavController) {
                                 )
                             }
 
-                            // Enable location layer if permission granted
+
                             googleMap.isMyLocationEnabled = true
 
                             googleMap.setMapStyle(
@@ -102,11 +100,11 @@ fun MapScreen(navController:NavController) {
                                 )
                             )
 
-                            // Adjust UI settings as needed
+
                             val uiSettings: UiSettings = googleMap.uiSettings
                             uiSettings.isZoomControlsEnabled = true
                             val locations = mutableListOf<MapMarker>()
-                            // Fetch locations from Firestore
+
                             FirebaseFirestore.getInstance().collection("locations")
                                 .get()
                                 .addOnSuccessListener { documents ->
@@ -178,7 +176,7 @@ fun MapScreen(navController:NavController) {
                 modifier = Modifier.fillMaxSize()
             )
         } else {
-            // Handle the case when permission is not granted
+
             Text(
                 text = "Permission not granted for accessing location.",
                 modifier = Modifier.fillMaxSize(),
@@ -188,7 +186,12 @@ fun MapScreen(navController:NavController) {
     }
 }
 
-
+data class Location(
+    val id: String,
+    val name: String,
+    val description: String,
+    val picture1: String
+)
 
 data class MapMarker(
     var id: String,

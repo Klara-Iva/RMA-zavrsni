@@ -63,7 +63,7 @@ fun RMATheme(
             val window = (view.context as Activity).window
             window.statusBarColor = colorScheme.primary.toArgb()
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
-            window.statusBarColor =   Color(0xFF82CC1C).toArgb()
+            window.statusBarColor =   Color(0xFF887177).toArgb()
 
 
         }

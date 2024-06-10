@@ -31,18 +31,16 @@ fun RegisterScreen(navController: NavController) {
     val context = LocalContext.current
 
     val outlinedTextFieldColors = TextFieldDefaults.outlinedTextFieldColors(
-        focusedBorderColor = Color(0xFF82CC1C), // Color when focused
-        unfocusedBorderColor = Color.Gray, // Color when not focused
-        cursorColor = Color(0xFF82CC1C), // Color of the caret (pointer)
-        focusedLabelColor = Color(0xFF82CC1C) // Color of the label when focused
+        focusedBorderColor = Color(0xFF887177),
+        unfocusedBorderColor = Color.Gray,
+        cursorColor = Color(0xFF887177),
+        focusedLabelColor = Color(0xFF887177)
     )
-
-    val keyboardController = LocalSoftwareKeyboardController.current
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF0F0F0))
+            .background(Color(0xFFf8f7f7))
             .padding(16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -65,7 +63,7 @@ fun RegisterScreen(navController: NavController) {
             colors = outlinedTextFieldColors,
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
 
-        )
+            )
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
             maxLines = 1,
@@ -75,7 +73,7 @@ fun RegisterScreen(navController: NavController) {
             colors = outlinedTextFieldColors,
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
 
-        )
+            )
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
             value = password,
@@ -85,19 +83,19 @@ fun RegisterScreen(navController: NavController) {
             colors = outlinedTextFieldColors,
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
 
-        )
+            )
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
             onClick = {
-               if(name.isNotEmpty()&&email.isNotEmpty()&&password.isNotEmpty()){
-                register(context, name, email, password,navController)}
-               else{
-                   Toast.makeText(context, "Missing data", Toast.LENGTH_SHORT).show()
-               }
+                if(name.isNotEmpty()&&email.isNotEmpty()&&password.isNotEmpty()){
+                    register(context, name, email, password,navController)}
+                else{
+                    Toast.makeText(context, "Missing data", Toast.LENGTH_SHORT).show()
+                }
             },
             colors = ButtonDefaults.buttonColors(
-                backgroundColor = Color(0xFF82CC1C),
+                backgroundColor = Color(0xFF887177),
             ),
             shape = RoundedCornerShape(50),
             modifier = Modifier
@@ -118,7 +116,7 @@ fun RegisterScreen(navController: NavController) {
         Button(
             onClick = { navController.popBackStack() },
             colors = ButtonDefaults.buttonColors(
-                backgroundColor = Color(0xFF82CC1C),
+                backgroundColor = Color(0xFF887177),
             ),
             shape = RoundedCornerShape(50)
         ) {
@@ -139,7 +137,7 @@ private fun register(context: Context, name: String, email: String, password: St
     auth.createUserWithEmailAndPassword(email, password)
         .addOnCompleteListener { task ->
             if (task.isSuccessful) {
-                // User is successfully registered, now save to Firestore
+
                 val user = hashMapOf(
                     "name" to name,
                     "email" to email

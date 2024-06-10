@@ -17,8 +17,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import coil.compose.rememberImagePainter
@@ -56,62 +58,88 @@ fun ProfileScreen(navController: NavController) {
         }
 
         LaunchedEffect(userId) {
-            if (userId != null) {
-                firestore.collection("users").document(userId).get()
-                    .addOnSuccessListener { document ->
-                        if (document != null) {
-                            userProfile =
-                                document.toObject(UserProfile::class.java) ?: UserProfile()
-                        }
+            firestore.collection("users").document(userId).get()
+                .addOnSuccessListener { document ->
+                    if (document != null) {
+                        userProfile =
+                            document.toObject(UserProfile::class.java) ?: UserProfile()
                     }
-                    .addOnFailureListener { exception ->
-                        loadError = true
-                        Log.e("ProfileScreen", "Error fetching profile data", exception)
-                    }
-            }
+                }
+                .addOnFailureListener { exception ->
+                    loadError = true
+                    Log.e("ProfileScreen", "Error fetching profile data", exception)
+                }
         }
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFF0F0F0))
+                .background(Color(0xFFf8f7f7))
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
+            androidx.compose.material3.Text(
+                color = Color.Black,
+                text = "User Profile",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+
             Box(
                 modifier = Modifier
-                    .size(128.dp)
+                    .size(170.dp)
                     .clip(CircleShape)
+
                     .background(Color.White)
-            ) {
-                if (selectedImageUri != null) {
-                    Image(
-                        painter = rememberAsyncImagePainter(selectedImageUri),
-                        contentDescription = "Selected Profile Picture",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                } else if (userProfile.picture.isNotEmpty()) {
-                    Image(
-                        painter = rememberAsyncImagePainter(userProfile.picture),
-                        contentDescription = "Profile Picture",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
+
+
+            ){
+                Box(
+                    modifier = Modifier
+                        .size(160.dp)
+                        .clip(CircleShape)
+                        .background(Color.White)
+                        .align(Alignment.Center)
+
+                ) {
+                    if (selectedImageUri != null) {
+                        Image(
+                            painter = rememberAsyncImagePainter(selectedImageUri),
+                            contentDescription = "Selected Profile Picture",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    } else if (userProfile.picture.isNotEmpty()) {
+                        Image(
+                            painter = rememberAsyncImagePainter(userProfile.picture),
+                            contentDescription = "Profile Picture",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
                 }
             }
 
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = " ${userProfile.name}",
+                style = MaterialTheme.typography.body1,
+                textAlign = TextAlign.Center,
+                fontSize = 20.sp
+            )
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
                 onClick = { pickImageLauncher.launch("image/*")
 
 
-                          },
-                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF82CC1C)),
+                },
+                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF887177)),
                 modifier = Modifier
-                    .fillMaxWidth()
+
                     .padding(vertical = 12.dp, horizontal = 24.dp),
                 shape = RoundedCornerShape(50)
             ) {
@@ -132,11 +160,7 @@ fun ProfileScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Text(
-                text = "Name: ${userProfile.name}",
-                style = MaterialTheme.typography.body1,
-                textAlign = TextAlign.Center
-            )
+
 
             Spacer(modifier = Modifier.height(32.dp))
 
@@ -149,7 +173,7 @@ fun ProfileScreen(navController: NavController) {
                         }
                     }
                 },
-                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF82CC1C)),
+                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF887177)),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 12.dp, horizontal = 24.dp),
@@ -175,11 +199,10 @@ fun ProfileScreen(navController: NavController) {
             uploadTask.addOnSuccessListener { _ ->
                 imageRef.downloadUrl.addOnSuccessListener { uri ->
                     val imageUrl = uri.toString()
-                    // Update user profile picture URL in Firestore
+
                     firestore.collection("users").document(userId)
                         .update("picture", imageUrl)
                         .addOnSuccessListener {
-                            //TODO stalno updejta svaki put kad se ude u profil
                             Toast.makeText(context, "Profile picture uploaded successfully!", Toast.LENGTH_SHORT).show()
                         }
                         .addOnFailureListener { e ->

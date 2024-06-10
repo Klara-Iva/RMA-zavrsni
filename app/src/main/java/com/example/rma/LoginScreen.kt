@@ -26,15 +26,15 @@ fun LoginRegisterScreen(navController: NavController) {
     var password by remember { mutableStateOf("") }
     val context = LocalContext.current
     val outlinedTextFieldColors = TextFieldDefaults.outlinedTextFieldColors(
-        focusedBorderColor = Color(0xFF82CC1C), // Color when focused
-        unfocusedBorderColor = Color.Gray, // Color when not focused
-        cursorColor = Color(0xFF82CC1C), // Color of the caret (pointer)
-        focusedLabelColor = Color(0xFF82CC1C) // Color of the label when focused
+        focusedBorderColor = Color(0xFF887177),
+        unfocusedBorderColor = Color.Gray,
+        cursorColor = Color(0xFF887177),
+        focusedLabelColor = Color(0xFF887177)
     )
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF0F0F0))
+            .background(Color(0xFFf8f7f7))
             .padding(16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -66,17 +66,17 @@ fun LoginRegisterScreen(navController: NavController) {
         Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = {
             if(email.isNotEmpty() && password.isNotEmpty()){
-            signIn(context, email, password,navController)}
+                signIn(context, email, password,navController)}
             else{
                 Toast.makeText(context, "Missing data", Toast.LENGTH_SHORT).show()
             }
 
-                         },
+        },
 
 
             colors = ButtonDefaults.buttonColors(
-            backgroundColor = Color(0xFF82CC1C),
-        ),
+                backgroundColor = Color(0xFF887177),
+            ),
             modifier = Modifier .padding(vertical = 12.dp, horizontal = 24.dp) ,
             shape = RoundedCornerShape(50)
         ) {
@@ -90,11 +90,11 @@ fun LoginRegisterScreen(navController: NavController) {
         Spacer(modifier = Modifier.height(50.dp))
         Button(onClick = { navController.navigate("register") }
             , colors = ButtonDefaults.buttonColors(
-            backgroundColor = Color(0xFF82CC1C),
+                backgroundColor = Color(0xFF887177),
             ),
             shape = RoundedCornerShape(50)) {
-                Text("Register"
-                    ,color = Color.White)
+            Text("Register"
+                ,color = Color.White)
         }
     }
 }
@@ -102,17 +102,17 @@ fun LoginRegisterScreen(navController: NavController) {
 
 private fun signIn(context: Context, email: String, password: String,navController: NavController) {
 
-        FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    Toast.makeText(context, "Logged in successfully", Toast.LENGTH_SHORT).show()
-                    (context as MainActivity).recreate()
+    FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
+        .addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                Toast.makeText(context, "Logged in successfully", Toast.LENGTH_SHORT).show()
+                (context as MainActivity).recreate()
 
-                } else {
-                    Toast.makeText(context, "Login failed", Toast.LENGTH_SHORT).show()
-                }
+            } else {
+                Toast.makeText(context, "Login failed", Toast.LENGTH_SHORT).show()
+            }
 
-    }
+        }
 
 }
 

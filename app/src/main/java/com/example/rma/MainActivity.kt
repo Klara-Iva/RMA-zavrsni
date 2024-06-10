@@ -1,6 +1,7 @@
 
 package com.example.rma
 
+
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -31,6 +32,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.google.firebase.firestore.FirebaseFirestore
 
 sealed class Screen(val route: String, val label: String, val icon: Int) {
     object Map : Screen("map", "Map", R.drawable.ic_map)
@@ -48,6 +51,8 @@ class MainActivity : ComponentActivity() {
                 Surface(
                     modifier = Modifier.fillMaxSize()
                 ) {
+
+
                     RMA()
                 }
             }
@@ -78,14 +83,13 @@ fun RMA() {
         NavigationGraph(navController, Modifier.padding(innerPadding))
     }
 }
-
 @Composable
 fun BottomNavigationBar(navController: NavHostController) {
     BottomNavigation(
-        backgroundColor = Color(0xFF82CC1C),
+        backgroundColor = Color(0xFF887177),
         contentColor = Color.White
     ) {
-        val items = listOf(Screen.Map, Screen.Find, Screen.Favourites,Screen.AddNewLocation, Screen.Profile)
+        val items = listOf(Screen.Map, Screen.Find, Screen.Favourites, Screen.AddNewLocation, Screen.Profile)
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentDestination = navBackStackEntry?.destination
         items.forEach { screen ->
@@ -93,17 +97,16 @@ fun BottomNavigationBar(navController: NavHostController) {
                 alwaysShowLabel = true,
                 selectedContentColor = Color.Black,
                 unselectedContentColor = MaterialTheme.colors.onPrimary.copy(alpha = ContentAlpha.medium),
-                modifier = Modifier.padding(8.dp),
+                modifier = Modifier.padding(2.dp),
                 icon = { Icon(painterResource(id = screen.icon), contentDescription = null) },
                 label = { Text(screen.label) },
                 selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
                 onClick = {
                     navController.navigate(screen.route) {
                         popUpTo(navController.graph.findStartDestination().id) {
-                            saveState = true
+                            saveState = false
                         }
                         launchSingleTop = true
-                        restoreState = true
                     }
                 }
             )
@@ -125,25 +128,20 @@ fun NavigationGraph(navController: NavHostController, modifier: Modifier = Modif
             composable("register") { AnimatedScreen { RegisterScreen(navController) } }
         } else {
             composable("login") {
-
                 navController.navigate(Screen.Map.route)
-
             }
             composable("register") {
-
                 navController.navigate(Screen.Map.route)
-
             }
         }
         composable("locationDetail/{documentId}") { backStackEntry ->
             val documentId = backStackEntry.arguments?.getString("documentId") ?: return@composable
-            LocationDetailScreenWithAnimation (documentId, navController)
+            LocationDetailScreenWithAnimation(documentId, navController)
         }
-
-        composable("addnewlocation") { AnimatedScreen {  AddNewLocationScreen(navController) } }
-
+        composable("addnewlocation") { AnimatedScreen { AddNewLocationScreen(navController) } }
     }
 }
+
 
 
 @Composable

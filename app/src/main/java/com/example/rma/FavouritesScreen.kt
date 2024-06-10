@@ -28,12 +28,6 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
 
-data class Location(
-    val id: String,
-    val name: String,
-    val opis: String,
-    val slika: String
-)
 
 @Composable
 fun FavouritesScreen(navController: NavController) {
@@ -77,7 +71,7 @@ fun FavouritesScreen(navController: NavController) {
 
     Column(
         modifier = Modifier
-            .background(Color(0xFFF0F0F0))
+            .background(Color(0xFFf8f7f7))
             .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -124,8 +118,8 @@ fun fetchFavoriteLocations(favoriteIds: List<String>, callback: (List<Location>)
                     val location = Location(
                         id = it.id,
                         name = it.getString("name") ?: "",
-                        opis = it.getString("opis") ?: "",
-                        slika = it.getString("slika") ?: ""
+                        description = it.getString("description") ?: "",
+                        picture1 = it.getString("picture1") ?: ""
                     )
                     locations.add(location)
                     if (locations.size == favoriteIds.size) {
@@ -156,7 +150,7 @@ fun LocationItem(location: Location, navController: NavController, removeFromFav
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
-                painter = rememberAsyncImagePainter(location.slika),
+                painter = rememberAsyncImagePainter(location.picture1),
                 contentDescription = location.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier

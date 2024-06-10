@@ -5,6 +5,10 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -23,9 +27,16 @@ import com.google.firebase.storage.ktx.storage
 import java.time.Instant
 import androidx.compose.material.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalViewConfiguration
+import coil.compose.rememberAsyncImagePainter
 import coil.compose.rememberImagePainter
 import com.google.firebase.messaging.RemoteMessage
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun AddNewLocationScreen(navController: NavController) {
@@ -43,19 +54,27 @@ fun AddNewLocationScreen(navController: NavController) {
     val pickImageLauncher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let { selectedImageUri = it }
     }
-
+    val outlinedTextFieldColors = TextFieldDefaults.outlinedTextFieldColors(
+        focusedBorderColor = Color(0xFF887177),
+        unfocusedBorderColor = Color.Gray,
+        cursorColor = Color(0xFF887177),
+        focusedLabelColor = Color(0xFF887177)
+    )
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top,
         modifier = Modifier
             .fillMaxSize()
+            .background(Color(0xFFf8f7f7))
             .padding(16.dp)
+
     ) {
         OutlinedTextField(
             value = name,
             onValueChange = { name = it },
             label = { Text("Name") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = outlinedTextFieldColors
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -65,7 +84,8 @@ fun AddNewLocationScreen(navController: NavController) {
             onValueChange = { latitude = it },
             label = { Text("Latitude") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = outlinedTextFieldColors
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -75,7 +95,8 @@ fun AddNewLocationScreen(navController: NavController) {
             onValueChange = { longitude = it },
             label = { Text("Longitude") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = outlinedTextFieldColors
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -84,49 +105,79 @@ fun AddNewLocationScreen(navController: NavController) {
             value = description,
             onValueChange = { description = it },
             label = { Text("Description") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = outlinedTextFieldColors
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(onClick = { pickImageLauncher.launch("image/*") },
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF82CC1C)),
+        Button(
+            onClick = { pickImageLauncher.launch("image/*") },
+            colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF887177)),
             modifier = Modifier.padding(end = 8.dp),
             shape = RoundedCornerShape(50)
         ) {
-            Text("Choose Image")
+            Text(
+                text = "Choose Image",
+                color = Color.White,
+            )
+
         }
 
         selectedImageUri?.let { uri ->
             Image(
-                painter = rememberImagePainter(uri),
+                painter = rememberAsyncImagePainter(uri),
                 contentDescription = "Selected Image",
+                contentScale = ContentScale.Crop,
                 modifier = Modifier
-                    .size(128.dp)
+
+                    .fillMaxWidth()
                     .padding(16.dp)
+
+                    .height(200.dp)
+                    .clip(RoundedCornerShape(20.dp))
             )
         }
+
 
         Spacer(modifier = Modifier.height(16.dp))
 
         val context = LocalContext.current
-        Button(onClick = {
-            Toast.makeText(context, "Uploading...", Toast.LENGTH_SHORT).show()
-            addLocation(context = context, name, latitude, longitude, description, selectedImageUri, currentUser?.uid, storage, db)
-            name = ""
-            latitude = ""
-            longitude = ""
-            description = ""
-            selectedImageUri = null
-                         },
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF82CC1C)),
-            modifier = Modifier.padding(end = 8.dp),
+        Button(
+            onClick = {
+                Toast.makeText(context, "Uploading...", Toast.LENGTH_SHORT).show()
+
+                    addLocation(
+                        context = context,
+                        name,
+                        latitude,
+                        longitude,
+                        description,
+                        selectedImageUri,
+                        currentUser?.uid,
+                        storage,
+                        db
+                    )
+
+                name = ""
+                latitude = ""
+                longitude = ""
+                description = ""
+                selectedImageUri = null
+            },
+            colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF887177)),
+            modifier = Modifier
+                .padding(end = 8.dp)
+                .fillMaxWidth()
+                ,
             shape = RoundedCornerShape(50)
         ) {
-            Text("Save Location")
+            Text("Save Location", color = Color.White,)
         }
+
     }
 }
+
 
 private fun addLocation(
     context: Context,
@@ -160,7 +211,7 @@ private fun addLocation(
                             "latitude" to lat,
                             "longitude" to lng,
                             "description" to description,
-                            "image" to imageUrl,
+                            "picture1" to imageUrl,
                             "addedByUser" to userId
                         )
 
@@ -168,7 +219,7 @@ private fun addLocation(
                             .add(location)
                             .addOnSuccessListener {
                                 Toast.makeText(context, "Location successfully uploaded!", Toast.LENGTH_SHORT).show()
-                                }
+                            }
                             .addOnFailureListener { e ->
                                 Toast.makeText(context, "Failed to upload location.", Toast.LENGTH_SHORT).show()
                             }
